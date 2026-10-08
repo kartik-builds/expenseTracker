@@ -7,8 +7,8 @@ const port = 3000
 app.use(express.json())
 dotenv.config()
 mongoose.connect(process.env.MongoDB_URI)
-    .then(() => console.log("MongoDB connected"))
-    .catch((err) => console.error("MongoDB connection error : ", err))
+.then(() => console.log("MongoDB connected"))
+.catch((err) => console.error("MongoDB connection error : ", err))
 app.get("/api/expenses", async (req, res) => {
     try {
         const expenses = await Expense.find()
@@ -17,15 +17,16 @@ app.get("/api/expenses", async (req, res) => {
     catch (err) {
         console.error("Error fetching expenses : ", err)
         return res.status(500).json({ message: "Internal server error" })
-    }
+    } 
 })
 app.post("/api/expenses", async (req, res) => {
     try {
+        const {category , description , amount , date } = req.body
         const newExpense = await Expense.create({
-            category: req.body.category,
-            description: req.body.description,
-            amount: req.body.amount,
-            date: req.body.date
+            category,
+            description,
+            amount,
+            date
         })
         res.status(201).json(newExpense)
     }
@@ -52,7 +53,7 @@ app.put("/api/expenses/:id", async (req, res) => {
         }
     }
 })
-
+// Delete route
 
 
 
