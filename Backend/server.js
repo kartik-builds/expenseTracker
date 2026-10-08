@@ -1,0 +1,66 @@
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv"
+import Expense from "./models/Expense.js";
+const app = express()
+const port = 3000
+app.use(express.json())
+dotenv.config()
+mongoose.connect(process.env.MongoDB_URI)
+    .then(() => console.log("MongoDB connected"))
+    .catch((err) => console.error("MongoDB connection error : ", err))
+app.get("/api/expenses", async (req, res) => {
+    try {
+        const expenses = await Expense.find()
+        res.status(200).json(expenses)
+    }
+    catch (err) {
+        console.error("Error fetching expenses : ", err)
+        return res.status(500).json({ message: "Internal server error" })
+    }
+})
+app.post("/api/expenses", async (req, res) => {
+    try {
+        const newExpense = await Expense.create({
+            category: req.body.category,
+            description: req.body.description,
+            amount: req.body.amount,
+            date: req.body.date
+        })
+        res.status(201).json(newExpense)
+    }
+    catch (err) {
+        console.error("Error adding expense : ", err)
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+})
+app.put("/api/expenses/:id", async (req, res) => {
+    try {
+        const updatedExpense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+        if (!updatedExpense) {
+            return res.status(404).json({ message: "Expense not found" })
+        }
+        res.status(200).json({ message: "Expense Updated Successfully : ", updatedExpense })
+    }
+    catch (err) {
+        console.error("Error updating the expense : ", err)
+        if (err.name === "ValidationError") {
+            return res.status(400).json({ message: "Invalid Entry" })
+        }
+        else {
+            return res.status(500).json({ message: "Internal server error" })
+        }
+    }
+})
+
+
+
+
+
+
+
+
+
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`)
+})
