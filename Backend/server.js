@@ -32,7 +32,12 @@ app.post("/api/expenses", async (req, res) => {
     }
     catch (err) {
         console.error("Error adding expense : ", err)
-        return res.status(500).json({ message: "Internal Server Error" })
+        if(err.name === "ValidationError"){
+            return res.status(400).json({message : "Invalid Entry"})
+        }
+        else{
+            return res.status(500).json({ message: "Internal Server Error" })
+        }
     }
 })
 app.put("/api/expenses/:id", async (req, res) => {
@@ -63,7 +68,7 @@ app.delete("/api/expenses/:id", async (req,res)=>{
     }
     catch(err){
         console.error("Error deleting expense : ",err)
-        if(err.name === CastError){
+        if(err.name === "CastError"){
             return res.status(400).json({message : "Invalid Id"})
         }
         else {
@@ -71,7 +76,6 @@ app.delete("/api/expenses/:id", async (req,res)=>{
         }
     }
 })
-
 
 
 
