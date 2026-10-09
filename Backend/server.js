@@ -53,8 +53,24 @@ app.put("/api/expenses/:id", async (req, res) => {
         }
     }
 })
-// Delete route
-
+app.delete("/api/expenses/:id", async (req,res)=>{
+    try{
+        const deleteExpense = await Expense.findByIdAndDelete(req.params.id)
+        if(!deleteExpense){
+            return res.status(404).json({message : "Expense not Found"})
+        }
+        res.status(200).json({message : "Expense Deleted Successfully"})
+    }
+    catch(err){
+        console.error("Error deleting expense : ",err)
+        if(err.name === CastError){
+            return res.status(400).json({message : "Invalid Id"})
+        }
+        else {
+            return res.status(500).json({message : "Internal Server Error"})
+        }
+    }
+})
 
 
 
