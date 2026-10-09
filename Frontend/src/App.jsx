@@ -3,7 +3,7 @@ import ExpenseForm from "./components/ExpenseForm"
 function App(){
   return(
     <>
-      <h1>Hellow rold</h1>
+      <h1>Expense Tracker</h1>
       <ExpenseForm/>
     </>
   )
