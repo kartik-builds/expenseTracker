@@ -1,10 +1,32 @@
 import "./App.css"
+import ExpenseList from "./components/ExpenseList"
+import { useState, useEffect } from "react"
 import ExpenseForm from "./components/ExpenseForm"
-function App(){
-  return(
+function App() {
+  const [expenses, setExpenses] = useState([])
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/expenses')
+        if (!response.ok) {
+          throw new Error('Failed to fetch expenses')
+        }
+        const data = await response.json()
+        setExpenses(data)
+        console.log('Fetched expenses:', data)
+      } catch (error) {
+        console.error('Error fetching expenses:', error)
+      }
+    }
+    fetchExpenses()
+  }, []) 
+
+  return (
     <>
       <h1>Expense Tracker</h1>
-      <ExpenseForm/>
+      <ExpenseForm />
+      <ExpenseList expenses={expenses} />
+
     </>
   )
 }

@@ -12,7 +12,7 @@ const ExpenseForm = () => {
         customCategory: ""
     })
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault()
         const finalExpense = {
             ...expense,
@@ -20,15 +20,42 @@ const ExpenseForm = () => {
                 ? expense.customCategory
                 : expense.category
         };
-
-        console.log(finalExpense);
+        try {
+            const response = await fetch('http://localhost:3000/api/expenses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(finalExpense)
+            })
+            if (!response.ok) {
+                throw new Error('Failed to add expense')
+            }
+            const data = await response.json()
+            console.log('Expense added successfully:', data)
+            if (expense.category === "Other") {
+                setExpense(prev => ({ ...prev, customCategory: "" }))
+            }
+            if(response.status === 201){
+                setExpense({
+                    category: "",
+                    amount: "",
+                    date: getTodayDate(),
+                    description: "",
+                    customCategory: ""
+                })
+            }
+        }
+        catch (error) {
+            console.error('Error adding expense:', error)
+        }
     }
 
     return (
         <div>
             <h2>Add Expense</h2>
             <form onSubmit={handleSubmit}>
-                <div>
+                 <div>
                     <label htmlFor="category">Category : </label>
                     <select id="category" value={expense.category} onChange={(event) => setExpense(prev => ({ ...prev, category: event.target.value }))} required>
                         <option value="" disabled hidden>Select Category</option>
@@ -64,5 +91,4 @@ const ExpenseForm = () => {
         </div>
     )
 }
-// BACKEND INTEGRATION NEXT DAY
 export default ExpenseForm
