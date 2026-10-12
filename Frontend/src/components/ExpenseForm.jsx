@@ -3,7 +3,7 @@ import { useState } from "react"
 const getTodayDate = () => {
     return new Date().toISOString().split('T')[0]
 }
-const ExpenseForm = () => {
+const ExpenseForm = ({ onExpenseAdded }) => {
     const [expense, setExpense] = useState({
         category: "",
         amount: "",
@@ -45,6 +45,7 @@ const ExpenseForm = () => {
                     customCategory: ""
                 })
             }
+            onExpenseAdded()
         }
         catch (error) {
             console.error('Error adding expense:', error)

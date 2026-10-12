@@ -1,4 +1,3 @@
-
 const ExpenseList = ({ expenses }) => {
     return (
         <div>
