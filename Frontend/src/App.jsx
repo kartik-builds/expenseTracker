@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import ExpenseForm from "./components/ExpenseForm"
 function App() {
   const [expenses, setExpenses] = useState([])
+
   const fetchExpenses = async () => {
     try {
       const response = await fetch('http://localhost:3000/api/expenses')
@@ -24,8 +25,14 @@ function App() {
     <>
       <h1>Expense Tracker</h1>
       <ExpenseForm onExpenseAdded={fetchExpenses} />
-      <ExpenseList expenses={expenses} />
-
+      <ExpenseList
+        expenses={expenses}
+        onExpenseDeleted={(id) => {
+          setExpenses(prevExpenses =>
+            prevExpenses.filter(expense => expense._id !== id)
+          );
+        }}
+      />
     </>
   )
 }

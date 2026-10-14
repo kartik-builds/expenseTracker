@@ -1,4 +1,20 @@
-const ExpenseList = ({ expenses }) => {
+const ExpenseList = ({ expenses, onExpenseDeleted }) => {
+    const handleDelete =  async (id)=>{
+        try{
+            const response = await fetch(`http://localhost:3000/api/expenses/${id}`, {
+                method: 'DELETE',
+            })
+            if(!response.ok){
+                throw new Error('Failed to delete expense')
+            }
+            const data = await response.json()
+            console.log('Expense deleted successfully:', data)
+            onExpenseDeleted(id)
+        }
+        catch(error){
+            console.error('Error deleting expense:', error)
+        }
+    }
     return (
         <div>
             <h1>Expense List</h1>
@@ -12,6 +28,7 @@ const ExpenseList = ({ expenses }) => {
                             <p>Description: {expense.description}</p>
                             <p>Date: {expense.date}</p>
                             <p>Amount: {expense.amount}</p>
+                            <button onClick={() => handleDelete(expense._id)}>Delete</button>
                         </li>
                     ))}
                 </ul>
