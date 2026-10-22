@@ -3,7 +3,6 @@ import cors from "cors"
 import mongoose from "mongoose";
 import dotenv from "dotenv"
 import Expense from "./models/Expense.js";
-import a from "./models/testBcrypt.js"
 const app = express()
 const port = 3000
 app.use(express.json())
