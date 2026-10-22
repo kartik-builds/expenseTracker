@@ -1,4 +1,4 @@
-const ExpenseList = ({ expenses, onExpenseDeleted }) => {
+const ExpenseList = ({ expenses, onExpenseDeleted, onEdit }) => {
     const handleDelete =  async (id)=>{
         try{
             const response = await fetch(`http://localhost:3000/api/expenses/${id}`, {
@@ -29,6 +29,7 @@ const ExpenseList = ({ expenses, onExpenseDeleted }) => {
                             <p>Date: {expense.date}</p>
                             <p>Amount: {expense.amount}</p>
                             <button onClick={() => handleDelete(expense._id)}>Delete</button>
+                            <button onClick={() => onEdit(expense)}>Edit</button>    
                         </li>
                     ))}
                 </ul>

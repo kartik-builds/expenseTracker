@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0]
-}
-const ExpenseForm = ({ onExpenseAdded }) => {
+const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }) => {
+    const getTodayDate = () => {
+        return new Date().toISOString().split('T')[0]
+    }
     const [expense, setExpense] = useState({
         category: "",
         amount: "",
@@ -21,13 +21,18 @@ const ExpenseForm = ({ onExpenseAdded }) => {
                 : expense.category
         };
         try {
-            const response = await fetch('http://localhost:3000/api/expenses', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(finalExpense)
-            })
+            const response = await fetch(
+                editingExpense
+                    ? `http://localhost:3000/api/expenses/${editingExpense._id}`
+                    : 'http://localhost:3000/api/expenses',
+                {
+                    method: editingExpense ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(finalExpense)
+                }
+            );
             if (!response.ok) {
                 throw new Error('Failed to add expense')
             }
@@ -36,27 +41,46 @@ const ExpenseForm = ({ onExpenseAdded }) => {
             if (expense.category === "Other") {
                 setExpense(prev => ({ ...prev, customCategory: "" }))
             }
-            if(response.status === 201){
-                setExpense({
-                    category: "",
-                    amount: "",
-                    date: getTodayDate(),
-                    description: "",
-                    customCategory: ""
-                })
-            }
+            setExpense({
+                category: "",
+                amount: "",
+                date: getTodayDate(),
+                description: "",
+                customCategory: ""
+            });
             onExpenseAdded()
+            if (editingExpense) {
+                onCancelEdit()
+            }
         }
         catch (error) {
             console.error('Error adding expense:', error)
         }
     }
-
+    useEffect(() => {
+        if (editingExpense) {
+            setExpense({
+                category: editingExpense.category,
+                amount: editingExpense.amount,
+                date: new Date(editingExpense.date).toISOString().split('T')[0],
+                description: editingExpense.description,
+                customCategory: editingExpense.customCategory || ""
+            });
+        } else {
+            setExpense({
+                category: "",         
+                amount: "",
+                date: getTodayDate(),
+                description: "",
+                customCategory: ""
+            });
+        }
+    }, [editingExpense]);
     return (
         <div>
             <h2>Add Expense</h2>
             <form onSubmit={handleSubmit}>
-                 <div>
+                <div>
                     <label htmlFor="category">Category : </label>
                     <select id="category" value={expense.category} onChange={(event) => setExpense(prev => ({ ...prev, category: event.target.value }))} required>
                         <option value="" disabled hidden>Select Category</option>
@@ -87,8 +111,9 @@ const ExpenseForm = ({ onExpenseAdded }) => {
                     <label htmlFor="description">Description:</label>
                     <input id="description" type="text" required value={expense.description} onChange={(event) => setExpense(prev => ({ ...prev, description: event.target.value }))} />
                 </div>
-                <button type="submit">Add Expense</button>
-            </form>
+                <button type="submit">
+                    {editingExpense ? "Update Expense" : "Add Expense"}
+                </button>        </form>
         </div>
     )
 }
