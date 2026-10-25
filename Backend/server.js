@@ -1,4 +1,5 @@
 import express from "express";
+import authRoutes from "./routes/authRoutes.js"
 import cors from "cors"
 import mongoose from "mongoose";
 import dotenv from "dotenv"
@@ -6,6 +7,7 @@ import Expense from "./models/Expense.js";
 const app = express()
 const port = 3000
 app.use(express.json())
+app.use("/api/auth", authRoutes);
 app.use(cors({
     origin : "http://localhost:5173"
 }))
