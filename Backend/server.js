@@ -13,20 +13,20 @@ dotenv.config()
 app.use(express.json())
 app.use(cors({
     origin: "http://localhost:5173",
-    credentials : true //Frontend and Backend run on different ports. When we use cookies for authentication, the browser needs permission to send credentials with cross-origin requests.
+    credentials: true //Frontend and Backend run on different ports. When we use cookies for authentication, the browser needs permission to send credentials with cross-origin requests.
 }))
 app.use(session({
-    secret : process.env.SESSION_SECRET,
-    resave : false,
-    saveUninitialized : false,
-    store : MongoStore.create({
-        mongoUrl : process.env.MongoDB_URI
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MongoDB_URI
     }),
-    cookie : {
-        httpOnly : true,
-        secure : false,
-        sameSite : "lax",
-        maxAge : 1000*60*60*24
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24
     }
 }))
 app.use("/api/auth", authRoutes);
@@ -35,9 +35,9 @@ mongoose.connect(process.env.MongoDB_URI)
     .catch((err) => console.error("MongoDB connection error : ", err))
 
 
-app.get("/api/expenses", requireAuth ,async (req, res) => {
+app.get("/api/expenses", requireAuth, async (req, res) => {
     try {
-        const expenses = await Expense.find()
+        const expenses = await Expense.find({ user: req.session.userId })
         res.status(200).json(expenses)
     }
     catch (err) {
@@ -45,14 +45,15 @@ app.get("/api/expenses", requireAuth ,async (req, res) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 })
-app.post("/api/expenses", requireAuth,async (req, res) => {
+app.post("/api/expenses", requireAuth, async (req, res) => {
     try {
         const { category, description, amount, date } = req.body
         const newExpense = await Expense.create({
             category,
             description,
             amount,
-            date
+            date,
+            user: req.session.userId
         })
         res.status(201).json(newExpense)
     }
@@ -66,10 +67,31 @@ app.post("/api/expenses", requireAuth,async (req, res) => {
         }
     }
 })
-app.put("/api/expenses/:id", requireAuth ,async (req, res) => {
+app.put("/api/expenses/:id", requireAuth, async (req, res) => {
     try {
-        const updatedExpense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-        if (!updatedExpense) {
+        const { category, description, amount, date } = req.body;
+
+        const updates = {};
+
+        if (category !== undefined) updates.category = category;
+        if (description !== undefined) updates.description = description;
+        if (amount !== undefined) updates.amount = amount;
+        if (date !== undefined) updates.date = date;
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                message: "No valid fields provided for update"
+            });
+        }
+
+        const updatedExpense = await Expense.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                user: req.session.userId
+            },
+            { $set: updates },
+            { new: true, runValidators: true }
+        ); if (!updatedExpense) {
             return res.status(404).json({ message: "Expense not found" })
         }
         res.status(200).json({ message: "Expense Updated Successfully : ", updatedExpense })
@@ -84,9 +106,9 @@ app.put("/api/expenses/:id", requireAuth ,async (req, res) => {
         }
     }
 })
-app.delete("/api/expenses/:id", requireAuth,async (req, res) => {
+app.delete("/api/expenses/:id", requireAuth, async (req, res) => {
     try {
-        const deleteExpense = await Expense.findByIdAndDelete(req.params.id)
+        const deleteExpense = await Expense.findOneAndDelete({ _id : req.params.id, user : req.session.userId})
         if (!deleteExpense) {
             return res.status(404).json({ message: "Expense not Found" })
         }

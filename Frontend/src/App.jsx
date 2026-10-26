@@ -7,7 +7,9 @@ function App() {
   const [editingExpense, setEditingExpense] = useState(null)
   const fetchExpenses = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/expenses')
+      const response = await fetch('http://localhost:3000/api/expenses', {
+        credentials: "include"
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch expenses')
       }
@@ -18,7 +20,7 @@ function App() {
       console.error('Error fetching expenses:', error)
     }
   }
-  
+
   useEffect(() => {
     fetchExpenses()
   }, [])
