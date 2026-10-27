@@ -3,6 +3,7 @@ const ExpenseList = ({ expenses, onExpenseDeleted, onEdit }) => {
         try{
             const response = await fetch(`http://localhost:3000/api/expenses/${id}`, {
                 method: 'DELETE',
+                credentials: "include"
             })
             if(!response.ok){
                 throw new Error('Failed to delete expense')

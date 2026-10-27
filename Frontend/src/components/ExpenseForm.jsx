@@ -27,6 +27,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }) => {
                     : 'http://localhost:3000/api/expenses',
                 {
                     method: editingExpense ? 'PUT' : 'POST',
+                    credentials: "include",
                     headers: {
                         'Content-Type': 'application/json'
                     },
