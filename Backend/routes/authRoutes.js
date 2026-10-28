@@ -95,4 +95,37 @@ router.post("/login", async (req, res) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 })
+// Check whether a user is already authenticated
+router.get("/me", async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({
+                message: "Not authenticated"
+            });
+        }
+
+        const user = await User.findById(req.session.userId)
+            .select("_id name email");
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        });
+    } catch (err) {
+        console.error("Session check error:", err);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}); 
 export default router
